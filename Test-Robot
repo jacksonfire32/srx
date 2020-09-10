@@ -1,0 +1,58 @@
+from pyPS4Controller.controller import Controller
+import RPi.GPIO as GPIO
+import time
+
+LF = 2
+LR = 3
+RF = 4
+RR = 5
+EN1 = 1
+EN2 = 6
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(LF,GPIO.OUT)
+GPIO.setup(LR,GPIO.OUT)
+GPIO.setup(RF,GPIO.OUT)
+GPIO.setup(RR,GPIO.OUT)
+GPIO.setup(EN1,GPIO.OUT)
+GPIO.setup(EN2,GPIO.OUT)
+
+GPIO.output(LF,GPIO.LOW)
+GPIO.output(LR,GPIO.LOW)
+GPIO.output(RF,GPIO.LOW)
+GPIO.output(RR,GPIO.LOW)
+Lp1=GPIO.PWM(EN1,1000)
+Rp2=GPIO.PWM(EN2,1000)
+
+Lp1.start(0)
+Rp2.start(0)
+
+class MyController(Controller):
+
+    def __init__(self, **kwargs):
+        Controller.__init__(self, **kwargs)
+
+    def on_L3_up(self):
+        print('L3 up Left F')
+        Lp1.ChangeDutyCycle(50)
+        GPIO.output(LF,GPIO.HIGH)
+ 
+    def on_L3_down(self):
+        print('L3 down Right F')
+        Lp1.ChangeDutyCycle(50)
+        GPIO.output(LR,GPIO.HIGH)
+
+    def on_R3_up(self):
+        print('R3 up Left F')
+        Lp2.ChangeDutyCycle(50)
+        GPIO.output(RF,GPIO.HIGH)
+
+    def on_R3_down(self):
+        print('R3 down Right F')
+        Lp2.ChangeDutyCycle(50)
+        GPIO.output(RR,GPIO.HIGH)
+
+
+controller = MyController(interface="/dev/input/js0", connecting_using_ds4drv=True)
+# you can start listening before controller is paired, as long as you pair it within the timeout window
+controller.listen(timeout=60)
